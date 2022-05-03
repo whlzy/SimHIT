@@ -1,0 +1,20 @@
+device: 'gpu' # cpu / gpu
+
+dataset:
+  name: 'mnist'
+  path: '/home/whlzy90/data'
+  # transform:
+  #   colorjitter:
+
+
+model:
+  act: 'Hardswish' # Hardswish / Relu
+  net_dim: [256, 64, 32]
+
+train:
+  max_epoch: 10
+  batch_size: 64
+  optimizer:
+    lr: 1e-3
+    beta1: 0.9
+    beta2: 0.99
