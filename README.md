@@ -47,3 +47,6 @@ The best checkpoint is in the **exp/*/checkpoint/best/model_best.pth**.
 |:-:| :----: | :----:|
 |MNIST |Hardswish | 98.16%|
 |MNIST |ReLU | 88.35%|
+
+## License
+This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).
