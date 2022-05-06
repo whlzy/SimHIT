@@ -3,9 +3,8 @@ import torch
 import torch.nn.functional as F
 
 
-# 搭建VGG_16网络
 class VGG_16(nn.Module):
-    def __init__(self, num_classes=101):
+    def __init__(self, num_classes):
         super(VGG_16, self).__init__()
         self.maxpool1 = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
