@@ -29,7 +29,7 @@ sh scripts/train_relu.sh
 
 - You can add new dataset in **src/data**, but maybe need to change some codes.
 
-- You can rewrite a new training code like **train_mlp** using **src/runner**. **src/runner** is a class which assembles partial training process and config process. You just need to use the **src/runner** and rewrite *train_one_epoch* and *test_one_epoch* like **train_mlp**. Like the **train_mlp**, you can freely modify the network and modify the training process in *train_one_epoch*.
+- You can rewrite a new training code like **train_mlp.py** using **src/runner.py**. **src/runner.py** is a class which assembles partial training process and config process. You just need to use the **src/runner.py** and rewrite *train_one_epoch* and *test_one_epoch* like **train_mlp.py**. Like the **train_mlp.py**, you can freely modify the network and modify the training process in *train_one_epoch*.
 
 ## EXP Log
 EXP log is in the **exp/test_hardswish** and **exp/test_relu**.
