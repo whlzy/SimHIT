@@ -8,6 +8,7 @@ __pycache__/
 
 # add by whlzy, ignore output dir
 **/exp/**
+**__pycache__**
 
 # Distribution / packaging
 .Python
