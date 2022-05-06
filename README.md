@@ -1,16 +1,8 @@
-# PR_Experiment of MNIST
-A simple experiment of MNIST for HIT PR Experiment.
-
-## Results
-|Dataset |Model  |Accuracy |
-|:-:| :----: | :----:|
-|MNIST |Hardswish | 98.16%|
-|MNIST |ReLU | 88.35%|
-
+# PR_EXP Framework
 ## Train and Eval
 - Clone
 ```
-git clone https://github.com/whlzy/PR_EXP_1_MNIST.git
+git clone https://github.com/whlzy/PR_EXP.git
 cd PR_EXP_1_MNIST
 ```
 
@@ -37,7 +29,7 @@ sh scripts/train_relu.sh
 
 - You can add new dataset in **src/data**, but maybe need to change some codes.
 
-- You can rewrite a new training code like **train_mlp** using **src/runner**. **src/runner** is a class which assemble the partial training process and config process. You just need use the **src/runner** and rewrite *train_one_epoch* and *test_one_epoch*. In the **train_mlp**, you can freely modify the network and modify the training process in *train_one_epoch*.
+- You can rewrite a new training code like **train_mlp** using **src/runner**. **src/runner** is a class which assembles partial training process and config process. You just need to use the **src/runner** and rewrite *train_one_epoch* and *test_one_epoch* like **train_mlp**. Like the **train_mlp**, you can freely modify the network and modify the training process in *train_one_epoch*.
 
 ## EXP Log
 EXP log is in the **exp/test_hardswish** and **exp/test_relu**.
@@ -47,3 +39,11 @@ The output.log is logged by **mmcv logging**.
 The tensorboard log is in the **exp/*/logdir**.
 
 The best checkpoint is in the **exp/*/checkpoint/best/model_best.pth**.
+
+## PR_Experiment
+
+### Mnist Results
+|Dataset |Model  |Accuracy |
+|:-:| :----: | :----:|
+|MNIST |Hardswish | 98.16%|
+|MNIST |ReLU | 88.35%|
