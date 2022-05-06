@@ -3,7 +3,7 @@
 - Clone
 ```
 git clone https://github.com/whlzy/PR_EXP.git
-cd PR_EXP_1_MNIST
+cd PR_EXP
 ```
 
 - You should modify the path of **test_hardswish.yml** or **config/test_relu.yml** to your local dataset path.
