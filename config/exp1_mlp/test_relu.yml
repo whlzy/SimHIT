@@ -1,0 +1,38 @@
+basic:
+  seed: 202205
+  device: 'gpu' # cpu / gpu
+  save:
+    period: 1 # every 1 epoch save
+    best: True # save the best score
+
+dataset:
+  name: 'mnist'
+  path: '/home/whlzy90/data'
+  # transform:
+  #   ColorJitter:
+  #   RandomCrop:
+  #   HorizontalFlip: 
+  #   VerticalFlip: 
+  #   Normalize:
+
+
+model:
+  act: 'ReLU' # Hardswish / ReLU
+  net_dim: [256, 64, 32]
+
+train:
+  max_epoch: 10
+  batch_size: 64
+  lr: 1e-3
+  optimizer:
+    type: 'adamw' # sgd / 'adamw'
+    beta1: 0.9
+    beta2: 0.999
+    # momentum: 0.9
+    # weight_decay: 1e-4
+  schedule:
+    type: 'Cosine' # Cosine / None / Step
+    minlr: 0
+    warmup: 'linear'
+    warmup_iters: 1 # 1 epoch
+    warmup_ratio: 1e-4

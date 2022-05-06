@@ -22,7 +22,7 @@ cat test_relu.yml
 ...
 ```
 
-- You can choose gpu or cpu in the **test_hardswish.yml** or **config/test_relu.yml**.
+- You can choose gpu or cpu in the **config/test_hardswish.yml** or **config/test_relu.yml**.
 
 - You can run the script.
 ```
@@ -35,10 +35,12 @@ sh scripts/train_relu.sh
 
 - You can add some new experiments with just adding new script in **scripts** and new yaml file in **config**.
 
-- You can add new dataset in **data**, but maybe need to change some codes.
+- You can add new dataset in **src/data**, but maybe need to change some codes.
+
+- You can rewrite a new training code like **train_mlp** using **src/runner**. **src/runner** is a class which assemble the partial training process and config process. You just need use the **src/runner** and rewrite *train_one_epoch* and *test_one_epoch*. In the **train_mlp**, you can freely modify the network and modify the training process in *train_one_epoch*.
 
 ## EXP Log
-EXP log is in the exp/test_hardswish and exp/test_relu.
+EXP log is in the **exp/test_hardswish** and **exp/test_relu**.
 
 The output.log is logged by **mmcv logging**.
 
