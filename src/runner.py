@@ -63,7 +63,7 @@ class runner():
         if optimizer_config['type'] == 'adamw':
             self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr, betas=(optimizer_config['beta1'], optimizer_config['beta2']))
         elif optimizer_config['type'] == 'sgd':
-            self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr, momentum=optimizer_config['momentum'], weight_decay=optimizer_config['weight_decay'])
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr, momentum=optimizer_config['momentum'], weight_decay=optimizer_config['weight_decay'])
 
         best_acc = 0
         for i in range(self.max_epoch):
