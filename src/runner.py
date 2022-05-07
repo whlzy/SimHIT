@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 class runner():
     def __init__(self, config_path, exp_name):
-        print(self.config_path)
+        
         self.config_path = config_path
         self.exp_name = exp_name
 
@@ -45,15 +45,18 @@ class runner():
             self.config['train']['batch_size'], \
             float(self.config['train']['lr'])
         
-        if self.config['dataset']['name'] == 'mnist':
-            self.train_loader, self.test_loader = mnist.get_dataset(self.config['dataset']['path'], self.batch_size)
-
         self.model = None
+        self.train_loader = None
+        self.test_loader = None
         self.optimizer = None
-        
-    def train(self, model, train_one_epoch, test_one_epoch):
-        print(model)
-        self.model = model(**self.config['model'])
+    
+    def set_data(self):
+        self.train_loader, self.test_loader = None
+
+    def set_model(self, model):
+        self.model = None
+
+    def train(self, train_one_epoch, test_one_epoch):
         if self.config['basic']['device'] == 'gpu':
             torch.cuda.manual_seed(self.seed)
             self.model = self.model.cuda()
@@ -61,9 +64,33 @@ class runner():
 
         optimizer_config = self.config['train']['optimizer']
         if optimizer_config['type'] == 'adamw':
-            self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr, betas=(optimizer_config['beta1'], optimizer_config['beta2']))
+            self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr,\
+                betas=(optimizer_config['beta1'], optimizer_config['beta2']))
         elif optimizer_config['type'] == 'sgd':
-            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr, momentum=optimizer_config['momentum'], weight_decay=optimizer_config['weight_decay'])
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr,\
+                momentum=optimizer_config['momentum'], weight_decay=float(optimizer_config['weight_decay']))
+
+        schedule_config = self.config['train']['schedule']
+        if schedule_config['type'] == 'Cosine':
+            minlr = 0.0
+            period = 0
+            if schedule_config['minlr'] is not None:
+                minlr = schedule_config['minlr']
+            if schedule_config['period'] is not None:
+                period = schedule_config['period']
+            self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR\
+                (self.optimizer, period, eta_min=minlr, last_epoch=-1, verbose=False)
+        
+        elif schedule_config['type'] == 'MultiStep':
+            gamma = 0.1
+            milestones = []
+            if schedule_config['gamma'] is not None:
+                gamma = schedule_config['gamma']
+            if schedule_config['milestones'] is not None:
+                milestones = schedule_config['milestones']
+            self.lr_scheduler = torch.optim.lr_scheduler.MultiStepLR\
+                (self.optimizer, milestones, gamma=gamma, last_epoch=-1, verbose=False)
+
 
         best_acc = 0
         for i in range(self.max_epoch):

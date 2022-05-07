@@ -21,18 +21,24 @@ model:
   net_dim: [256, 64, 32]
 
 train:
-  max_epoch: 10
+  max_epoch: 20
   batch_size: 64
   lr: 1e-3
   optimizer:
     type: 'adamw' # sgd / 'adamw'
     beta1: 0.9
     beta2: 0.999
-    # momentum: 0.9
+    # type: 'sgd'
+    # momentum: 0.99
     # weight_decay: 1e-4
   schedule:
-    type: 'Cosine' # Cosine / None / Step
+    type: 'Cosine' # Cosine / None / MultiStep
     minlr: 0
+    period: 10
     warmup: 'linear'
     warmup_iters: 1 # 1 epoch
     warmup_ratio: 1e-4
+
+    # type: 'MultiStep' # Cosine / None / MultiStep
+    # milestones: [5, 10]
+    # gamma: 0.5

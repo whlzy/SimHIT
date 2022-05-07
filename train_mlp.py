@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import argparse
 import src.model.mlp as mlp
-import src.data.mnist
+import src.data.mnist as mnist
 import src.runner as runner
 import tqdm
 import shutil
@@ -23,11 +23,17 @@ class mlp_runner(runner.runner):
         self.exp_name = exp_name
         runner.runner.__init__(self, self.config_path, self.exp_name)
         self.model = mlp.MLP
-        print(self.seed)
 
+    def set_data(self):
+        if self.config['dataset']['name'] == 'mnist':
+            self.train_loader, self.test_loader = mnist.get_dataset(self.config['dataset']['path'], self.batch_size)
+
+    def set_model(self):
+        self.model = self.model(**self.config['model'])
 
     def train_one_epoch(self, current_epoch, max_epoch):
         self.model.train()
+        self.mmcv_logger.info("LR: {}".format(self.optimizer.state_dict()['param_groups'][0]['lr']))
         for i, (images, labels) in enumerate(self.train_loader):
             if self.config['basic']['device'] == 'gpu':
                 images = images.cuda()
@@ -38,9 +44,11 @@ class mlp_runner(runner.runner):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            
             if (i+1) % 100 == 0:
                 self.mmcv_logger.info('Epoch [{}/{}], Loss: {:.4f}'.format(current_epoch + 1, self.max_epoch, loss.item()))
                 self.writer.add_scalar('Loss/%s' % ('train'), loss, current_epoch * len(self.train_loader) + i)
+        self.lr_scheduler.step()
 
     def test_one_epoch(self, current_epoch, max_epoch):
         self.model.eval()
@@ -61,7 +69,9 @@ class mlp_runner(runner.runner):
 
 def main():
     runner = mlp_runner(args.config_path, args.exp_name)
-    runner.train(runner.model, runner.train_one_epoch, runner.test_one_epoch)
+    runner.set_data()
+    runner.set_model()
+    runner.train(runner.train_one_epoch, runner.test_one_epoch)
 
 if __name__ == "__main__":
     main()
