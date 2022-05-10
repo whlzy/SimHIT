@@ -5,8 +5,11 @@ import torch.nn as nn
 import argparse
 import src.utils.save as save
 import src.utils.logging as logging
+<<<<<<< HEAD
 import src.model.mlp as mlp
 import src.data.plant_seedlings as plant_seedlings
+=======
+>>>>>>> dev
 import tqdm
 import shutil
 from torch.utils.tensorboard import SummaryWriter
@@ -40,16 +43,59 @@ class runner():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
         torch.manual_seed(self.seed)
+        self.mmcv_logger.info('EXP Seed: {}'.format(self.seed))
 
         self.max_epoch, self.batch_size, self.lr = \
             self.config['train']['max_epoch'], \
             self.config['train']['batch_size'], \
             float(self.config['train']['lr'])
         
+<<<<<<< HEAD
         if self.config['dataset']['name'] == 'plant_seedlings':
             self.train_loader, self.test_loader = plant_seedlings.get_dataset(self.config['dataset']['path'],
                                                                               0.8,
                                                                               self.batch_size)
+=======
+        self.train_transforms = []
+        if self.config['dataset']['train']['Resize'] is not None:
+            self.train_transforms.append(transforms.Resize(self.config['dataset']['train']['Resize']))
+        elif self.config['dataset']['train']['RandomHorizontalFlip'] is not None:
+            self.train_transforms.append(transforms.RandomHorizontalFlip())
+        elif self.config['dataset']['train']['RandomVerticalFlip'] is not None:
+            self.train_transforms.append(transforms.RandomVerticalFlip())
+        elif self.config['dataset']['train']['RandomCrop'] is not None:
+            self.train_transforms.append(transforms.RandomCrop(transforms.Resize(self.config['dataset']['train']['Resize'])))
+        elif self.config['dataset']['train']['ColorJitter'] is not None:
+            self.train_transforms.append(transforms.ToTensor())
+        self.train_transforms.append(transforms.ToTensor())
+        if self.config['dataset']['train']['Normalize'] is not None:
+            self.train_transforms.append(transforms.Normalize(self.config['dataset']['train']['Resize']))
+
+
+        data_transform = {
+        'train': transforms.Compose([
+            transforms.Resize(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(224),
+            transforms.RandomRotation(90),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ]),
+        'val': transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ]),
+    }
+
+        self.model = None
+        self.train_loader = None
+        self.test_loader = None
+        self.optimizer = None
+    
+    def set_data(self):
+        self.train_loader, self.test_loader = None
+>>>>>>> dev
 
         self.model = None
         self.optimizer = None

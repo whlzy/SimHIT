@@ -30,7 +30,10 @@ class ResBlock(nn.Module):
         return output
 
 
+<<<<<<< HEAD:src/model/resnet.py
 # 实现resnet网络
+=======
+>>>>>>> dev:src/model/ResNet.py
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes):
         super(ResNet, self).__init__()
@@ -63,7 +66,11 @@ class ResNet(nn.Module):
             else:  # 后面的stride都设置为1
                 layers.append(block(channel, channel, 1))
             self.in_channel = channel
+<<<<<<< HEAD:src/model/resnet.py
         # 返回时序容器：Modules会以它们传入的顺序被添加到容器中
+=======
+ 
+>>>>>>> dev:src/model/ResNet.py
         return nn.Sequential(*layers)
 
     def forward(self, x):
