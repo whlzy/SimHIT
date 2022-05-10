@@ -3,7 +3,6 @@ import torch
 import torch.nn.functional as F
 
 
-# 实现resnet中的残差块
 class ResBlock(nn.Module):
     def __init__(self, in_channel, out_channel, stride=1):
         super(ResBlock, self).__init__()
@@ -14,7 +13,7 @@ class ResBlock(nn.Module):
             nn.Conv2d(out_channel, out_channel, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(out_channel)
         )
-        # 如果输入和输出的通道数不一致，或其步长不为1，需要将二者转成一致
+
         if stride != 1 or in_channel != out_channel:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=stride, bias=False),
@@ -25,15 +24,11 @@ class ResBlock(nn.Module):
 
     def forward(self, x):
         output = self.net(x)
-        output += self.shortcut(x)  # 输入+输出
+        output += self.shortcut(x)
         output = F.relu(output)
         return output
 
 
-<<<<<<< HEAD:src/model/resnet.py
-# 实现resnet网络
-=======
->>>>>>> dev:src/model/ResNet.py
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes):
         super(ResNet, self).__init__()
@@ -61,22 +56,18 @@ class ResNet(nn.Module):
     def _make_layer(self, block, channel, num_blocks, stride):
         layers = []
         for i in range(num_blocks):
-            if i == 0:  # 第一个是输入的channel和输入的stride
+            if i == 0:
                 layers.append(block(self.in_channel, channel, stride))
-            else:  # 后面的stride都设置为1
+            else:
                 layers.append(block(channel, channel, 1))
             self.in_channel = channel
-<<<<<<< HEAD:src/model/resnet.py
-        # 返回时序容器：Modules会以它们传入的顺序被添加到容器中
-=======
  
->>>>>>> dev:src/model/ResNet.py
         return nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.maxpool(x)
-        # 四层layer
+
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)

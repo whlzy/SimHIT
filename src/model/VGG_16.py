@@ -2,8 +2,6 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
-
-# 搭建VGG_16网络
 class VGG_16(nn.Module):
     def __init__(self, num_classes):
         super(VGG_16, self).__init__()
