@@ -6,22 +6,35 @@ basic:
     best: True # save the best score
 
 dataset:
-  name: 'mnist'
-  path: '/home/whlzy90/data'
-  # transform:
-  #   ColorJitter:
-  #   RandomCrop:
-  #   HorizontalFlip: 
-  #   VerticalFlip: 
-  #   Normalize:
+  name: 'PlantSeedlings'
+  path: './datasets/Plant_Seedlings'
+  rate: 0.8  # train:val = 4:1
+  num_classes: 12
+  train:
+    Resize: [224, 224]
+    RandomHorizontalFlip: 90
+    RandomVerticalFlip:
+    RandomCrop: 224
+    RandomRotation: 90
+#     ColorJitter:
+    HorizontalFlip:
+    VerticalFlip:
+    Normalize:
+      mean: [0.5, 0.5, 0.5]
+      std: [0.5, 0.5, 0.5]
+  test:
+    Resize: [224, 224]
+    Normalize:
+      mean: [ 0.5, 0.5, 0.5 ]
+      std: [ 0.5, 0.5, 0.5 ]
 
 
 model:
   act: 'Hardswish' # Hardswish / ReLU
-  net_dim: [256, 64, 32]
+  net_dim: [2, 2, 2, 2]
 
 train:
-  max_epoch: 20
+  max_epoch: 50
   batch_size: 64
   lr: 1e-3
   optimizer:

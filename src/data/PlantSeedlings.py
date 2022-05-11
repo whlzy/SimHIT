@@ -6,10 +6,11 @@ import numpy as np
 import os
 import shutil
 
+
 def split(datapath, filepath, rate):
     datapath = os.path.join(datapath, 'train')
     lists = sorted(os.listdir(datapath))
-    filepath = os.paths.join(filepath, 'datalist')
+    filepath = os.path.join(filepath, 'datalist')
 
     if not os.path.exists(filepath):
         os.makedirs(filepath)
@@ -24,27 +25,28 @@ def split(datapath, filepath, rate):
 
         with open(os.path.join(filepath, 'total.txt'), 'a+') as fh:
             for img in imgs:
-                path = os.path.join(datapath, 'train', list, img)
+                path = os.path.join(datapath, list, img)
                 fh.write(path + '  ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'train.txt'), 'a+') as f:
             for i in range(train_len):
-                path = os.path.join(datapath, 'train', list, imgs[i])
+                path = os.path.join(datapath, list, imgs[i])
                 f.write(path + '    ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'val.txt'), 'a+') as f:
             for i in range(train_len, len(imgs)):
-                path = os.path.join(datapath, 'train', list, imgs[i])
+                path = os.path.join(datapath, list, imgs[i])
                 f.write(path + '    ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'labels.txt'), 'a+') as f:
-            f.write(str(num) + '  ' + l + '\n')
+            f.write(str(num) + '  ' + list + '\n')
 
         num = num + 1
 
 
 def default_loader(path):
     return Image.open(path).convert('RGB')
+
 
 class PlantSeedlingsDataset(Dataset):
     def __init__(self, listpath, transform=None, loader=default_loader):
@@ -75,43 +77,11 @@ class PlantSeedlingsDataset(Dataset):
 
 def get_dataset(datapath, rate, train_transforms, test_transforms, batch_size, filepath):
     split(datapath, filepath, rate)
-    data_transform = {
-        'train': transforms.Compose([
-            transforms.Resize(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomCrop(224),
-            transforms.RandomRotation(90),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ]),
-        'val': transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ]),
-    }
     
-    train_transforms = []
-    test_transforms = []
-    
-    data_transform = {
-        'train': transforms.Compose([
-            transforms.Resize(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomCrop(224),
-            transforms.RandomRotation(90),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ]),
-        'val': transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ]),
-    }
-    
-    train_data = PlantDataset(listpath=os.path.join(datapath, 'train.txt'), transform=data_transform['train'])
-    val_data = PlantDataset(listpath=os.path.join(datapath, 'val.txt'), transform=data_transform['val'])
+    train_data = PlantSeedlingsDataset(listpath=os.path.join(filepath, 'datalist', 'train.txt'),
+                                       transform=transforms.Compose(train_transforms))
+    val_data = PlantSeedlingsDataset(listpath=os.path.join(filepath, 'datalist', 'val.txt'),
+                                     transform=transforms.Compose(test_transforms))
     train_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(dataset=val_data, batch_size=batch_size, shuffle=True, num_workers=0)
 

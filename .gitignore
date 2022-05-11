@@ -10,6 +10,9 @@ __pycache__/
 **/exp/**
 **__pycache__**
 
+# ignore .idea file
+./idea
+
 # Distribution / packaging
 .Python
 build/

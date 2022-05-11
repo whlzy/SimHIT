@@ -6,6 +6,7 @@ import argparse
 import src.model.resnet as resnet
 import src.data.PlantSeedlings as PlantSeedlings
 import src.runner as runner
+import pandas as pd
 import tqdm
 import shutil
 from torch.utils.tensorboard import SummaryWriter
@@ -26,11 +27,11 @@ class resnet_runner(runner.runner):
     def set_data(self):
         if self.config['dataset']['name'] == 'PlantSeedlings':
             self.train_loader, self.test_loader = PlantSeedlings.get_dataset(self.config['dataset']['path'],\
-            self.config['dataset']['rate'], self.config['dataset']['train'], self.config['dataset']['test'],\
+            self.config['dataset']['rate'], self.train_transforms, self.test_transforms,\
             self.batch_size, self.filepath)
 
     def set_model(self):
-        self.model = resnet.ResNet(resnet.ResBlock, [2, 2, 2, 2], 12)
+        self.model = resnet.ResNet(resnet.ResBlock, self.config['model']['net_dim'], self.config['dataset']['num_classes'])
 
     def train_one_epoch(self, current_epoch, max_epoch):
         self.model.train()
@@ -68,11 +69,13 @@ class resnet_runner(runner.runner):
 
         return correct
 
+
 def main():
     runner = resnet_runner(args.config_path, args.exp_name)
     runner.set_data()
     runner.set_model()
     runner.train(runner.train_one_epoch, runner.test_one_epoch)
+
 
 if __name__ == "__main__":
     main()

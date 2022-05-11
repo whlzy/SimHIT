@@ -7,6 +7,7 @@ import src.utils.save as save
 import src.utils.logging as logging
 import tqdm
 import shutil
+from torchvision import transforms
 from torch.utils.tensorboard import SummaryWriter
 
 class runner():
@@ -46,34 +47,28 @@ class runner():
         self.train_transforms = []
         if self.config['dataset']['train']['Resize'] is not None:
             self.train_transforms.append(transforms.Resize(self.config['dataset']['train']['Resize']))
-        elif self.config['dataset']['train']['RandomHorizontalFlip'] is not None:
+        if self.config['dataset']['train']['RandomHorizontalFlip'] is not None:
             self.train_transforms.append(transforms.RandomHorizontalFlip())
-        elif self.config['dataset']['train']['RandomVerticalFlip'] is not None:
+        if self.config['dataset']['train']['RandomVerticalFlip'] is not None:
             self.train_transforms.append(transforms.RandomVerticalFlip())
-        elif self.config['dataset']['train']['RandomCrop'] is not None:
-            self.train_transforms.append(transforms.RandomCrop(transforms.Resize(self.config['dataset']['train']['Resize'])))
-        elif self.config['dataset']['train']['ColorJitter'] is not None:
-            self.train_transforms.append(transforms.ToTensor())
+        if self.config['dataset']['train']['RandomCrop'] is not None:
+            self.train_transforms.append(transforms.RandomCrop(int(self.config['dataset']['train']['RandomCrop'])))
+        if self.config['dataset']['train']['RandomRotation'] is not None:
+            self.train_transforms.append(transforms.RandomRotation(int(self.config['dataset']['train']['RandomRotation'])))
+        # elif self.config['dataset']['train']['ColorJitter'] is not None:
+        #     self.train_transforms.append(transforms.ToTensor())
         self.train_transforms.append(transforms.ToTensor())
         if self.config['dataset']['train']['Normalize'] is not None:
-            self.train_transforms.append(transforms.Normalize(self.config['dataset']['train']['Resize']))
+            self.train_transforms.append(transforms.Normalize(mean=self.config['dataset']['train']['Normalize']['mean'],
+                                                              std=self.config['dataset']['train']['Normalize']['std']))
 
-
-        data_transform = {
-            'train': transforms.Compose([
-                transforms.Resize(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(224),
-                transforms.RandomRotation(90),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-            ]),
-            'val': transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-            ]),
-        }
+        self.test_transforms = []
+        if self.config['dataset']['test']['Resize'] is not None:
+            self.test_transforms.append(transforms.Resize(self.config['dataset']['test']['Resize']))
+        self.test_transforms.append(transforms.ToTensor())
+        if self.config['dataset']['test']['Normalize'] is not None:
+            self.test_transforms.append(transforms.Normalize(mean=self.config['dataset']['test']['Normalize']['mean'],
+                                                              std=self.config['dataset']['test']['Normalize']['std']))
 
         self.model = None
         self.train_loader = None
