@@ -22,11 +22,13 @@ class mlp_runner(runner.runner):
         self.config_path = config_path
         self.exp_name = exp_name
         runner.runner.__init__(self, self.config_path, self.exp_name)
-        self.model = mlp.MLP
+        if 'train' in self.config['dataset'] and 'RandomCrop' in self.config['dataset']['train']:
+            self.model = mlp.MLP
 
     def set_data(self):
         if self.config['dataset']['name'] == 'mnist':
-            self.train_loader, self.test_loader = mnist.get_dataset(self.config['dataset']['path'], self.batch_size)
+            self.train_loader, self.test_loader = mnist.get_dataset(self.config['dataset']['path'], 
+                self.batch_size, self.train_transforms, self.test_transforms)
 
     def set_model(self):
         self.model = self.model(**self.config['model'])
@@ -72,8 +74,8 @@ def main():
     runner.set_data()
     runner.set_model()
     runner.train(runner.train_one_epoch, runner.test_one_epoch)
-    print(os.getcwd())
-    runner.test(1, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
+    test_image=torch.randn(1, 1, 24, 24)
+    runner.test(test_image, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
 
 if __name__ == "__main__":
     main()

@@ -8,21 +8,19 @@ import src.utils.logging as logging
 import tqdm
 import time
 import shutil
-
 from torchvision import transforms
-
 from thop.profile import profile
-
 from torch.utils.tensorboard import SummaryWriter
 
 class runner():
     def __init__(self, config_path, exp_name):
-        
+        loca=time.strftime('%Y-%m-%d-%H-%M-%S')
+        print(loca)
         self.config_path = config_path
-        self.exp_name = exp_name
+        self.exp_name = loca+'-'+exp_name
 
         cwd = os.getcwd()
-        self.filepath = 'exp/%s/' % exp_name
+        self.filepath = 'exp/%s/' % self.exp_name
         if not os.path.exists(self.filepath):
             os.makedirs(self.filepath)
             os.makedirs(self.filepath + 'logdir')
@@ -30,13 +28,15 @@ class runner():
         else:
             raise AssertionError("File has existed, please delete the file.")
 
-        self.writer = SummaryWriter(os.path.join('exp', exp_name, 'logdir'))
+        self.writer = SummaryWriter(os.path.join('exp', self.exp_name, 'logdir'))
 
-        self.mmcv_logger = logging.get_logger('mmcv_logger', log_file=os.path.join('exp', exp_name, 'output.log')) 
+        self.mmcv_logger = logging.get_logger('mmcv_logger', log_file=os.path.join('exp', self.exp_name, 'output.log')) 
         self.mmcv_logger.info('Train log')
 
         with open(self.config_path, 'r') as f: 
             self.config = yaml.safe_load(f)
+        with open(os.path.join("exp", self.exp_name, "config.yaml"), 'w') as f:
+            yaml.dump(self.config, f)
         self.mmcv_logger.info(self.config)
 
         self.seed = self.config['basic']['seed']
@@ -50,30 +50,37 @@ class runner():
             float(self.config['train']['lr'])
 
         self.train_transforms = []
-        if self.config['dataset']['train']['Resize'] is not None:
-            self.train_transforms.append(transforms.Resize(self.config['dataset']['train']['Resize']))
-        if self.config['dataset']['train']['RandomHorizontalFlip'] is not None:
-            self.train_transforms.append(transforms.RandomHorizontalFlip())
-        if self.config['dataset']['train']['RandomVerticalFlip'] is not None:
-            self.train_transforms.append(transforms.RandomVerticalFlip())
-        if self.config['dataset']['train']['RandomCrop'] is not None:
-            self.train_transforms.append(transforms.RandomCrop(int(self.config['dataset']['train']['RandomCrop'])))
-        if self.config['dataset']['train']['RandomRotation'] is not None:
-            self.train_transforms.append(transforms.RandomRotation(int(self.config['dataset']['train']['RandomRotation'])))
-        # elif self.config['dataset']['train']['ColorJitter'] is not None:
-        #     self.train_transforms.append(transforms.ToTensor())
-        self.train_transforms.append(transforms.ToTensor())
-        if self.config['dataset']['train']['Normalize'] is not None:
-            self.train_transforms.append(transforms.Normalize(mean=self.config['dataset']['train']['Normalize']['mean'],
-                                                              std=self.config['dataset']['train']['Normalize']['std']))
+        if 'train' in self.config['dataset']:
+            if 'Resize' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.Resize(self.config['dataset']['train']['Resize']))
+            if 'RandomHorizontalFlip' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.RandomHorizontalFlip())
+            if 'RandomVerticalFlip' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.RandomVerticalFlip())
+            if 'RandomCrop' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.RandomCrop(self.config['dataset']['train']['RandomCrop']))
+            if 'ColorJitter' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.ColorJitter(*self.config['dataset']['train']['ColorJitter']))
+            self.train_transforms.append(transforms.ToTensor())
+            if 'Normalize' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.Normalize(mean=self.config['dataset']['train']['Normalize']['mean'],
+                                                                std=self.config['dataset']['train']['Normalize']['std']))
+        else:
+            self.train_transforms.append(transforms.ToTensor())
 
         self.test_transforms = []
-        if self.config['dataset']['test']['Resize'] is not None:
-            self.test_transforms.append(transforms.Resize(self.config['dataset']['test']['Resize']))
-        self.test_transforms.append(transforms.ToTensor())
-        if self.config['dataset']['test']['Normalize'] is not None:
-            self.test_transforms.append(transforms.Normalize(mean=self.config['dataset']['test']['Normalize']['mean'],
-                                                              std=self.config['dataset']['test']['Normalize']['std']))
+        if 'test' in self.config['dataset']:
+            if 'Resize' in self.config['dataset']['test']:
+                self.test_transforms.append(transforms.Resize(self.config['dataset']['test']['Resize']))
+            self.test_transforms.append(transforms.ToTensor())
+            if 'Normalize' in self.config['dataset']['test']:
+                self.test_transforms.append(transforms.Normalize(mean=self.config['dataset']['test']['Normalize']['mean'],
+                                                                std=self.config['dataset']['test']['Normalize']['std']))
+        else:
+            self.train_transforms.append(transforms.ToTensor())
+        
+        self.train_transforms = transforms.Compose(self.train_transforms)
+        self.test_transforms = transforms.Compose(self.test_transforms)
 
         self.model = None
         self.train_loader = None
@@ -102,7 +109,7 @@ class runner():
             torch.cuda.manual_seed(self.seed)
             self.model = self.model.cuda()
         self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
-        self.mmcv_logger.info(self.model)
+        self.mmcv_logger.info("\n{}".format(self.model))
         self.mmcv_logger.info("********Training Start*******")
 
         optimizer_config = self.config['train']['optimizer']
@@ -164,7 +171,7 @@ class runner():
             self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
         self.mmcv_logger.info("********Training End*********")
     
-    def test(self, test_one_image, ckptpath=None):
+    def test(self, test_one_image=None, ckptpath=None):
         if ckptpath is None:
             ckptpath=os.path.join(self.filepath, "checkpoint/best/model_best.pth")
         self.model = self.model.cpu()
@@ -176,7 +183,7 @@ class runner():
             self.model = self.model.cuda()
         self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
             
-        macs, params, time_used = self.calc_params_macs_time()
+        macs, params, time_used = self.calc_params_macs_time(test_one_image)
         self.mmcv_logger.info("MACs: {:.5f}G, Params: {:.5f}M, Inference Time: {:.5f}MS".format(macs / 1e9, params / 1e6, time_used * 1e3))
 
         self.mmcv_logger.info(self.model)
