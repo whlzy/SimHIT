@@ -1,4 +1,4 @@
-# 🎈A Simple Framework for HIT Pattern Recognition Experiment🎈
+# 🎈 SimHIT: A Simple Framework for HIT Pattern Recognition Experiment 🎈
 ## Train and Eval 🚀
 - Clone
 ```
