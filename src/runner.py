@@ -6,8 +6,13 @@ import argparse
 import src.utils.save as save
 import src.utils.logging as logging
 import tqdm
+import time
 import shutil
+
 from torchvision import transforms
+
+from thop.profile import profile
+
 from torch.utils.tensorboard import SummaryWriter
 
 class runner():
@@ -43,7 +48,7 @@ class runner():
             self.config['train']['max_epoch'], \
             self.config['train']['batch_size'], \
             float(self.config['train']['lr'])
-        
+
         self.train_transforms = []
         if self.config['dataset']['train']['Resize'] is not None:
             self.train_transforms.append(transforms.Resize(self.config['dataset']['train']['Resize']))
@@ -81,11 +86,24 @@ class runner():
     def set_model(self, model):
         self.model = None
 
+    def calc_params_macs_time(self, input=None):
+        if input is None:
+            input = torch.randn(1, 3, 224, 224)
+        if self.config['basic']['device'] == 'gpu':
+            input = input.cuda()
+        macs, params = profile(self.model, inputs=(input, ))
+        start = time.time()
+        _ = self.model(input)
+        time_used = time.time()-start
+        return macs, params, time_used
+
     def train(self, train_one_epoch, test_one_epoch):
         if self.config['basic']['device'] == 'gpu':
             torch.cuda.manual_seed(self.seed)
             self.model = self.model.cuda()
+        self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
         self.mmcv_logger.info(self.model)
+        self.mmcv_logger.info("********Training Start*******")
 
         optimizer_config = self.config['train']['optimizer']
         if optimizer_config['type'] == 'adamw':
@@ -144,3 +162,53 @@ class runner():
                 }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')            
             
             self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
+        self.mmcv_logger.info("********Training End*********")
+    
+    def test(self, test_one_image, ckptpath=None):
+        if ckptpath is None:
+            ckptpath=os.path.join(self.filepath, "checkpoint/best/model_best.pth")
+        self.model = self.model.cpu()
+        checkpoint = torch.load(ckptpath, map_location='cpu')
+        self.model.load_state_dict(checkpoint['model'])
+
+        if self.config['basic']['device'] == 'gpu':
+            torch.cuda.manual_seed(self.seed)
+            self.model = self.model.cuda()
+        self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
+            
+        macs, params, time_used = self.calc_params_macs_time()
+        self.mmcv_logger.info("MACs: {:.5f}G, Params: {:.5f}M, Inference Time: {:.5f}MS".format(macs / 1e9, params / 1e6, time_used * 1e3))
+
+        self.mmcv_logger.info(self.model)
+        self.mmcv_logger.info("**********Test Start*********")
+
+
+        # best_acc = 0
+        # for i in range(self.max_epoch):
+        #     self.mmcv_logger.info('-----Epoch [{}/{}] START-----'.format(i + 1, self.max_epoch))
+            
+        #     train_one_epoch(i, self.max_epoch)
+        #     acc = test_one_epoch(i, self.max_epoch)
+            
+        #     if self.config['basic']['save']['best'] == True:
+        #         is_best = acc > best_acc
+        #         if is_best:
+        #             best_acc = acc
+        #             save.save_checkpoint({
+        #                 'epoch': i,
+        #                 'model': self.model.state_dict(),
+        #                 'optimizer': self.optimizer.state_dict(),
+        #                 'best_acc': best_acc
+        #             }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')
+            
+        #     if (i+1) % self.config['basic']['save']['period'] == 0:
+        #         save.save_checkpoint({
+        #             'epoch': i,
+        #             'model': self.model.state_dict(),
+        #             'optimizer': self.optimizer.state_dict(),
+        #             'best_acc': best_acc
+        #         }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')            
+            
+        #     self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
+
+        self.mmcv_logger.info("***********Test End**********")

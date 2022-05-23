@@ -72,6 +72,8 @@ def main():
     runner.set_data()
     runner.set_model()
     runner.train(runner.train_one_epoch, runner.test_one_epoch)
+    print(os.getcwd())
+    runner.test(1, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
 
 if __name__ == "__main__":
     main()

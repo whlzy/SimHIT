@@ -21,7 +21,7 @@ model:
   net_dim: [256, 64, 32]
 
 train:
-  max_epoch: 20
+  max_epoch: 2
   batch_size: 64
   lr: 1e-3
   optimizer:
