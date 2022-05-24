@@ -15,10 +15,8 @@ from torch.utils.tensorboard import SummaryWriter
 class runner():
     def __init__(self, config_path, exp_name):
         loca=time.strftime('%Y-%m-%d-%H-%M-%S')
-        print(loca)
         self.config_path = config_path
-        self.exp_name = loca+'-'+exp_name
-
+        self.exp_name = os.path.join(exp_name, loca)
         cwd = os.getcwd()
         self.filepath = 'exp/%s/' % self.exp_name
         if not os.path.exists(self.filepath):
