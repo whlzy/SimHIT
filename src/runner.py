@@ -144,6 +144,8 @@ class runner():
         for i in range(self.max_epoch):
             self.mmcv_logger.info('-----Epoch [{}/{}] START-----'.format(i + 1, self.max_epoch))
             
+            self.writer.add_scalar('Lr/%s' % ('train'), self.optimizer.state_dict()['param_groups'][0]['lr'], i)
+
             train_one_epoch(i, self.max_epoch)
             acc = test_one_epoch(i, self.max_epoch)
             

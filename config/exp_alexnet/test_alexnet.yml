@@ -34,17 +34,17 @@ train:
   batch_size: 64
   lr: 1e-3
   optimizer:
-    type: 'adamw' # sgd / 'adamw'
-    beta1: 0.9
-    beta2: 0.999
+    # type: 'adamw' # sgd / 'adamw'
+    # beta1: 0.9
+    # beta2: 0.999
 
-    # type: 'sgd'
-    # momentum: 0.99
-    # weight_decay: 1e-4
+    type: 'sgd'
+    momentum: 0.99
+    weight_decay: 1e-4
   schedule:
     type: 'Cosine' # Cosine / None / MultiStep
     minlr: 0
-    period: 25
+    period: 20
     warmup: 'linear'
     warmup_iters: 1 # 1 epoch
     warmup_ratio: 1e-4
