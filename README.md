@@ -43,13 +43,27 @@ The tensorboard log is in the **exp/*/test_hardswish/logdir**.
 The best checkpoint is in the **exp/*/test_hardswish/checkpoint/best/model_best.pth**.
 
 ## PR_Experiment ⚡
-
+###
+- train mlp.
+```
+sh scripts/train_hardswish.sh
+sh scripts/train_relu.sh
+```
+- train alexnet.
+```
+sh scripts/train_AlexNet.sh
+```
+- train resnet18.
+```
+sh scripts/train_resnet18.sh
+```
 ### Results 📊
 |Dataset |Model  |Accuracy | Tip |
 |:-:|:----:|:----:|:----:|
 |MNIST |Hardswish | 98.16%|  |
 |MNIST |ReLU | 88.35%|  |
 |Caltech101 |AlexNet | 71.46%| train data : val data = 9 : 1 |
+|PlantSeedlings |ResNet18 | | train data : val data = 9 : 1 |
 
 ## License ⭐
 This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).
