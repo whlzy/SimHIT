@@ -26,20 +26,20 @@ def split(datapath, filepath, rate):
         with open(os.path.join(filepath, 'total.txt'), 'a+') as fh:
             for img in imgs:
                 path = os.path.join(datapath, list, img)
-                fh.write(path + '  ' + str(num) + '\n')
+                fh.write(path + ' ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'train.txt'), 'a+') as f:
             for i in range(train_len):
                 path = os.path.join(datapath, list, imgs[i])
-                f.write(path + '    ' + str(num) + '\n')
+                f.write(path + ' ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'val.txt'), 'a+') as f:
             for i in range(train_len, len(imgs)):
                 path = os.path.join(datapath, list, imgs[i])
-                f.write(path + '    ' + str(num) + '\n')
+                f.write(path + ' ' + str(num) + '\n')
 
         with open(os.path.join(filepath, 'labels.txt'), 'a+') as f:
-            f.write(str(num) + '  ' + list + '\n')
+            f.write(str(num) + ' ' + list + '\n')
 
         num = num + 1
 
@@ -56,7 +56,7 @@ class PlantSeedlingsDataset(Dataset):
             for line in f:
                 line = line.strip('\n')
                 line = line.rstrip('\n')
-                data = line.split('    ')
+                data = line.rsplit(' ', 1)
                 imgs.append((data[0], int(data[1])))
         self.imgs = imgs
         self.transform = transform
@@ -75,14 +75,13 @@ class PlantSeedlingsDataset(Dataset):
         return len(self.imgs)
 
 
-def get_dataset(datapath, rate, train_transforms, test_transforms, batch_size, filepath):
+def get_dataset(datapath, filepath, rate, train_transforms, test_transforms, batch_size, num_workers=2):
     split(datapath, filepath, rate)
-    
     train_data = PlantSeedlingsDataset(listpath=os.path.join(filepath, 'datalist', 'train.txt'),
                                        transform=train_transforms)
     val_data = PlantSeedlingsDataset(listpath=os.path.join(filepath, 'datalist', 'val.txt'),
                                      transform=test_transforms)
-    train_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(dataset=val_data, batch_size=batch_size, shuffle=True, num_workers=0)
+    train_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(dataset=val_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
     return train_loader, val_loader

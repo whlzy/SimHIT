@@ -26,8 +26,8 @@ class alexnet_runner(runner.runner):
 
     def set_data(self):
         if self.config['dataset']['name'] == 'caltech-101':
-            self.train_loader, self.test_loader = Caltech101.get_dataset(self.config['dataset']['path'], 
-                self.config['dataset']['rate'], self.train_transforms, self.test_transforms, self.batch_size, self.filepath)
+            self.train_loader, self.test_loader = Caltech101.get_dataset(self.config['dataset']['path'], self.filepath, 
+                self.config['dataset']['rate'], self.train_transforms, self.test_transforms, self.batch_size, self.num_workers)
 
     def set_model(self):
         self.model = self.model(**self.config['model'])

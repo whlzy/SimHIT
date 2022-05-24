@@ -6,8 +6,8 @@ basic:
     best: True # save the best score
 
 dataset:
-  name: 'caltech-101'
-  path: '/home/whlzy90/data/caltech-101'
+  name: 'PlantSeedlings'
+  path: '/home/whlzy90/data/plant_seedlings'
   rate: 0.9
   train:
     Resize: [224, 224]
@@ -26,14 +26,13 @@ dataset:
 
 
 model:
-  num_classes: 101
-  init_weights: True
+  num_classes: 12
 
 train:
   max_epoch: 100
   batch_size: 64
   lr: 1e-3
-  num_workers: 4
+  num_workers: 6
   optimizer:
     # type: 'adamw' # sgd / 'adamw'
     # beta1: 0.9

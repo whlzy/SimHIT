@@ -74,12 +74,12 @@ class Caltech101Dataset(Dataset):
         return len(self.imgs)
 
 
-def get_dataset(datapath, rate, train_transforms, test_transforms, batch_size, filepath):
+def get_dataset(datapath, filepath, rate, train_transforms, test_transforms, batch_size, num_workers=2):
     split(datapath, filepath, rate)
     train_data = Caltech101Dataset(listpath=os.path.join(filepath, 'datalist', 'train.txt'),
                                        transform=train_transforms)
     val_data = Caltech101Dataset(listpath=os.path.join(filepath, 'datalist', 'val.txt'),
                                      transform=test_transforms)
-    train_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(dataset=val_data, batch_size=batch_size, shuffle=True, num_workers=0)
+    train_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(dataset=val_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     return train_loader, val_loader

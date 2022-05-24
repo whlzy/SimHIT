@@ -33,6 +33,7 @@ train:
   max_epoch: 10
   batch_size: 64
   lr: 1e-3
+  num_workers: 4
   optimizer:
     type: 'adamw' # sgd / 'adamw'
     beta1: 0.9

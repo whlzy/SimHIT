@@ -26,12 +26,11 @@ class resnet_runner(runner.runner):
 
     def set_data(self):
         if self.config['dataset']['name'] == 'PlantSeedlings':
-            self.train_loader, self.test_loader = PlantSeedlings.get_dataset(self.config['dataset']['path'],\
-            self.config['dataset']['rate'], self.train_transforms, self.test_transforms,\
-            self.batch_size, self.filepath)
+            self.train_loader, self.test_loader = PlantSeedlings.get_dataset(self.config['dataset']['path'], self.filepath, 
+                self.config['dataset']['rate'], self.train_transforms, self.test_transforms, self.batch_size, self.num_workers)
 
     def set_model(self):
-        self.model = resnet.ResNet(resnet.ResBlock, self.config['model']['net_dim'], self.config['dataset']['num_classes'])
+        self.model = resnet.ResNet_18(**self.config['model'])
 
     def train_one_epoch(self, current_epoch, max_epoch):
         self.model.train()
@@ -75,6 +74,8 @@ def main():
     runner.set_data()
     runner.set_model()
     runner.train(runner.train_one_epoch, runner.test_one_epoch)
+    test_image=torch.randn(1, 1, 24, 24)
+    runner.test(test_image, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
 
 
 if __name__ == "__main__":

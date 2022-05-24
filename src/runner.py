@@ -42,10 +42,11 @@ class runner():
         torch.backends.cudnn.benchmark = True
         torch.manual_seed(self.seed)
 
-        self.max_epoch, self.batch_size, self.lr = \
+        self.max_epoch, self.batch_size, self.lr, self.num_workers = \
             self.config['train']['max_epoch'], \
             self.config['train']['batch_size'], \
-            float(self.config['train']['lr'])
+            float(self.config['train']['lr']), \
+            self.config['train']['num_workers']
 
         self.train_transforms = []
         if 'train' in self.config['dataset']:
