@@ -22,8 +22,7 @@ class mlp_runner(runner.runner):
         self.config_path = config_path
         self.exp_name = exp_name
         runner.runner.__init__(self, self.config_path, self.exp_name)
-        if 'train' in self.config['dataset'] and 'RandomCrop' in self.config['dataset']['train']:
-            self.model = mlp.MLP
+        self.model = mlp.MLP
 
     def set_data(self):
         if self.config['dataset']['name'] == 'mnist':
