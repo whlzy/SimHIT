@@ -44,11 +44,12 @@ The best checkpoint is in the **exp/*/test_hardswish/checkpoint/best/model_best.
 
 ## PR_Experiment ⚡
 
-### Mnist Results 📊
-|Dataset |Model  |Accuracy |
-|:-:| :----: | :----:|
-|MNIST |Hardswish | 98.16%|
-|MNIST |ReLU | 88.35%|
+### Results 📊
+|Dataset |Model  |Accuracy | Tip |
+|:-:|:----:|:----:|:----:|
+|MNIST |Hardswish | 98.16%|  |
+|MNIST |ReLU | 88.35%|  |
+|Caltech101 |AlexNet | 71.46%| train data : val data = 9 : 1 |
 
 ## License ⭐
 This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).
