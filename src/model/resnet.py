@@ -3,35 +3,86 @@ import torch
 import torch.nn.functional as F
 
 
-class ResBlock(nn.Module):
-    def __init__(self, in_channel, out_channel, stride=1):
-        super(ResBlock, self).__init__()
-        self.net = nn.Sequential(
-            nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=stride, padding=1, bias=False),
-            nn.BatchNorm2d(out_channel),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channel, out_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(out_channel)
-        )
+def conv3x3(in_planes, out_planes, stride=1):
+    """3x3 convolution with padding"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=1, bias=False)
 
-        if stride != 1 or in_channel != out_channel:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(out_channel)
-            )
-        else:
-            self.shortcut = nn.Sequential()
+
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(BasicBlock, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
 
     def forward(self, x):
-        output = self.net(x)
-        output += self.shortcut(x)
-        output = F.relu(output)
-        return output
+        residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            residual = self.downsample(x)
+
+        out += residual
+        out = self.relu(out)
+
+        return out
 
 
-class ResNet_18(nn.Module):
-    def __init__(self, num_classes):
-        super(ResNet_18, self).__init__()
+class Bottleneck(nn.Module):
+    expansion = 4
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(Bottleneck, self).__init__()
+        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
+                               padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(planes * 4)
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        if self.downsample is not None:
+            residual = self.downsample(x)
+
+        out += residual
+        out = self.relu(out)
+
+        return out
+
+
+class ResNet(nn.Module):
+    def __init__(self, block, layers, num_classes=1000):
+        super(ResNet, self).__init__()
         self.in_channel = 64
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
@@ -39,10 +90,10 @@ class ResNet_18(nn.Module):
             nn.ReLU(inplace=True)
         )
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(ResBlock, 64, 2, stride=1)
-        self.layer2 = self._make_layer(ResBlock, 128, 2, stride=2)
-        self.layer3 = self._make_layer(ResBlock, 256, 2, stride=2)
-        self.layer4 = self._make_layer(ResBlock, 512, 2, stride=2)
+        self.layer1 = self._make_layer(block, 64, layers[0], stride=1)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AvgPool2d(7, stride=1)
         self.fc = nn.Linear(512, num_classes)
 

@@ -30,7 +30,7 @@ class resnet_runner(runner.runner):
                 self.config['dataset']['rate'], self.train_transforms, self.test_transforms, self.batch_size, self.num_workers)
 
     def set_model(self):
-        self.model = resnet.ResNet_18(**self.config['model'])
+        self.model = resnet.ResNet(**self.config['model'])
 
     def train_one_epoch(self, current_epoch, max_epoch):
         self.model.train()
