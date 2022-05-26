@@ -1,66 +1,90 @@
 import torch
 import torch.nn as nn
-from resnet import ResNet
 
 
-class SELayer(nn.Module):
-    def __init__(self, channel, reduction=16):
-        super(SELayer, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channel, channel // reduction, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channel // reduction, channel, bias=False),
+class Block(nn.Module):
+    def __init__(self, in_channels, filters, stride=1, is_1x1conv=False):
+        super(Block, self).__init__()
+        filter1, filter2, filter3 = filters
+        self.is_1x1conv = is_1x1conv
+        self.relu = nn.ReLU(inplace=True)
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels, filter1, kernel_size=1, stride=stride,bias=False),
+            nn.BatchNorm2d(filter1),
+            nn.ReLU()
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(filter1, filter2, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(filter2),
+            nn.ReLU()
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(filter2, filter3, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(filter3),
+        )
+        if is_1x1conv:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, filter3, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(filter3)
+            )
+        self.se = nn.Sequential(
+            nn.AdaptiveAvgPool2d((1,1)),
+            nn.Conv2d(filter3,filter3//16,kernel_size=1),
+            nn.ReLU(),
+            nn.Conv2d(filter3//16,filter3,kernel_size=1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y.expand_as(x)
+        x_shortcut = x
+        x1 = self.conv1(x)
+        x1 = self.conv2(x1)
+        x1 = self.conv3(x1)
+        x2 = self.se(x1)
+        x1 = x1*x2
+        if self.is_1x1conv:
+            x_shortcut = self.shortcut(x_shortcut)
+        x1 = x1 + x_shortcut
+        x1 = self.relu(x1)
+        return x1
 
 
-def conv3x3(in_planes, out_planes, stride=1):
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
-
-
-class SEBasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None,
-                 *, reduction=16):
-        super(SEBasicBlock, self).__init__()
-        self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = nn.BatchNorm2d(planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes, 1)
-        self.bn2 = nn.BatchNorm2d(planes)
-        self.se = SELayer(planes, reduction)
-        self.downsample = downsample
-        self.stride = stride
+class senet(nn.Module):
+    def __init__(self, num, classes):
+        super(senet, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+        self.conv2 = self._make_layer(64, (64, 64, 256), num[0],1)
+        self.conv3 = self._make_layer(256, (128, 128, 512), num[1], 2)
+        self.conv4 = self._make_layer(512, (256, 256, 1024), num[2], 2)
+        self.conv5 = self._make_layer(1024, (512, 512, 2048), num[3], 2)
+        self.global_average_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Sequential(
+            nn.Linear(2048, classes)
+        )
 
     def forward(self, x):
-        residual = x
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
+        x = self.global_average_pool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x
 
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.se(out)
-
-        if self.downsample is not None:
-            residual = self.downsample(x)
-
-        out += residual
-        out = self.relu(out)
-
-        return out
+    def _make_layer(self,in_channels, filters, num, stride=1):
+        layers = []
+        block_1 = Block(in_channels, filters, stride=stride, is_1x1conv=True)
+        layers.append(block_1)
+        for i in range(1, num):
+            layers.append(Block(filters[2], filters, stride=1, is_1x1conv=False))
+        return nn.Sequential(*layers)
 
 
-def SE_Resnet18(num_classes):
-    model = ResNet(block=SEBasicBlock, layers=[2, 2, 2, 2], num_classes=num_classes)
-    model.avgpool = nn.AdaptiveAvgPool2d(1)
-    return model
+

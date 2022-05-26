@@ -3,7 +3,7 @@ import yaml
 import torch
 import torch.nn as nn
 import argparse
-import src.model.vgg as vgg
+import src.model.senet as senet
 import src.data.PlantSeedlings as PlantSeedlings
 import src.runner as runner
 import pandas as pd
@@ -22,7 +22,6 @@ class resnet_runner(runner.runner):
     def __init__(self, config_path, exp_name):
         self.config_path = config_path
         self.exp_name = exp_name
-        self.bn = False
         runner.runner.__init__(self, self.config_path, self.exp_name)
 
     def set_data(self):
@@ -31,9 +30,7 @@ class resnet_runner(runner.runner):
                 self.config['dataset']['rate'], self.train_transforms, self.test_transforms, self.batch_size, self.num_workers)
 
     def set_model(self):
-        if self.config['model']['batch_norm'] == 'True':
-            self.bn = True
-        self.model = vgg.VGG(**self.config['model'])
+        self.model = senet.senet(**self.config['model'])
 
     def train_one_epoch(self, current_epoch, max_epoch):
         self.model.train()

@@ -75,7 +75,7 @@ def main():
     runner.set_model()
     runner.train(runner.train_one_epoch, runner.test_one_epoch)
     test_image=torch.randn(1, 1, 24, 24)
-    runner.test(test_image, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
+    # runner.test(test_image, "./exp/exp1_mlp/test_hardswish/checkpoint/best/model_best.pth")
 
 
 if __name__ == "__main__":
