@@ -172,7 +172,7 @@ class runner():
             self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
         self.mmcv_logger.info("********Training End*********")
     
-    def test(self, test_one_image=None, ckptpath=None):
+    def load_model(self, test_one_image=None, ckptpath=None):
         if ckptpath is None:
             ckptpath=os.path.join(self.filepath, "checkpoint/best/model_best.pth")
         self.model = self.model.cpu()
@@ -186,37 +186,5 @@ class runner():
             
         macs, params, time_used = self.calc_params_macs_time(test_one_image)
         self.mmcv_logger.info("MACs: {:.5f}G, Params: {:.5f}M, Inference Time: {:.5f}MS".format(macs / 1e9, params / 1e6, time_used * 1e3))
-
-        self.mmcv_logger.info(self.model)
-        self.mmcv_logger.info("**********Test Start*********")
-
-
-        # best_acc = 0
-        # for i in range(self.max_epoch):
-        #     self.mmcv_logger.info('-----Epoch [{}/{}] START-----'.format(i + 1, self.max_epoch))
-            
-        #     train_one_epoch(i, self.max_epoch)
-        #     acc = test_one_epoch(i, self.max_epoch)
-            
-        #     if self.config['basic']['save']['best'] == True:
-        #         is_best = acc > best_acc
-        #         if is_best:
-        #             best_acc = acc
-        #             save.save_checkpoint({
-        #                 'epoch': i,
-        #                 'model': self.model.state_dict(),
-        #                 'optimizer': self.optimizer.state_dict(),
-        #                 'best_acc': best_acc
-        #             }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')
-            
-        #     if (i+1) % self.config['basic']['save']['period'] == 0:
-        #         save.save_checkpoint({
-        #             'epoch': i,
-        #             'model': self.model.state_dict(),
-        #             'optimizer': self.optimizer.state_dict(),
-        #             'best_acc': best_acc
-        #         }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')            
-            
-        #     self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
-
-        self.mmcv_logger.info("***********Test End**********")
+        self.mmcv_logger.info("\n{}".format(self.model))
+        self.mmcv_logger.info("**********Load End***********")

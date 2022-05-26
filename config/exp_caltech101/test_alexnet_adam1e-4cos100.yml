@@ -6,33 +6,33 @@ basic:
     best: True # save the best score
 
 dataset:
-  name: 'mnist'
-  path: '/home/whlzy90/data'
+  name: 'caltech-101'
+  path: '/home/whlzy90/data/caltech-101'
+  rate: 0.9
   train:
-    Resize: [28, 28]
-    RandomCrop: [24, 24]
+    Resize: [256, 256]
+    RandomCrop: [224, 224]
     RandomHorizontalFlip: True 
     RandomVerticalFlip: True
-    ColorJitter: [0.1, 0.1, 0.1, 0.1]
-    # Normalize:
-    #   mean: [0.5, 0.5, 0.5]
-    #   std: [0.5, 0.5, 0.5]
+    #ColorJitter: [0.2, 0.2, 0.2, 0.2]
+    Normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
   test:
-    Resize: [24, 24]
-    # Normalize:
-    #   mean: [0.5, 0.5, 0.5]
-    #   std: [0.5, 0.5, 0.5]
+    Resize: [224, 224]
+    Normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
 
 
 model:
-  act: 'Hardswish' # Hardswish / ReLU
-  net_dim: [256, 64, 32]
-  input_dim: 576
+  num_classes: 101
+  init_weights: True
 
 train:
-  max_epoch: 2
-  batch_size: 64
-  lr: 1e-3
+  max_epoch: 100
+  batch_size: 128
+  lr: 1e-4
   num_workers: 4
   optimizer:
     type: 'adamw' # sgd / 'adamw'
@@ -45,10 +45,10 @@ train:
   schedule:
     type: 'Cosine' # Cosine / None / MultiStep
     minlr: 0
-    period: 10
-    warmup: 'linear'
-    warmup_iters: 1 # 1 epoch
-    warmup_ratio: 1e-4
+    period: 100
+    # warmup: 'linear'
+    # warmup_iters: 1 # 1 epoch
+    # warmup_ratio: 1e-4
 
     # type: 'MultiStep' # Cosine / None / MultiStep
     # milestones: [5, 10]

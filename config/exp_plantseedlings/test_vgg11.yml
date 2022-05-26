@@ -7,7 +7,7 @@ basic:
 
 dataset:
   name: 'PlantSeedlings'
-  path: '/home/whlzy90/data/plant_seedlings'
+  path: './datasets/Plant_Seedlings'
   rate: 0.9
   train:
     Resize: [224, 224]
@@ -26,14 +26,13 @@ dataset:
 
 
 model:
-  # ResNet18
-  block: BasicBlock
-  layers: [2, 2, 2, 2]
+  cfg: [ 64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M' ]
+#  {'A': [ 64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M' ],  # 11 layers
+#  'B': [ 64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M' ],  # 13 layers
+#  'D': [ 64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M' ],  # 16 layers
+#  'E': [ 64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M' ],}  # 19 layers
+  batch_norm: False
   num_classes: 12
-  # ResNet50
-#  block: Bottleneck
-#  layers: [3, 4, 6, 3]
-#  num_classes: 12
 
 train:
   max_epoch: 100

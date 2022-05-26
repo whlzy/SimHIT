@@ -1,3 +1,11 @@
-exp_name='exp_plantseedlings/test_resnet'
-config_path='config/exp_plantseedlings/test_resnet18.yml'
-python train_resnet.py --config_path $config_path --exp_name $exp_name
+export CUDA_VISIBLE_DEVICES=1
+sh scripts/train_resnet18_sgd1e-3cos100.sh
+sh scripts/train_resnet18_sgd2e-3cos100.sh
+sh scripts/train_resnet18_sgd1e-4cos100.sh
+sh scripts/train_resnet18_sgd2e-4cos100.sh
+sh scripts/train_resnet18_sgd4e-4cos100.sh
+sh scripts/train_resnet18_adam1e-3cos100.sh
+sh scripts/train_resnet18_adam2e-3cos100.sh
+sh scripts/train_resnet18_adam1e-4cos100.sh
+sh scripts/train_resnet18_adam2e-4cos100.sh
+sh scripts/train_resnet18_adam4e-4cos100.sh
