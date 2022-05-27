@@ -9,6 +9,7 @@ __pycache__/
 # add by whlzy, ignore output dir
 **/exp/**
 **__pycache__**
+**/pretrain/**
 
 # ignore .idea file
 ./idea
