@@ -2,7 +2,7 @@ basic:
   seed: 202205
   device: 'gpu' # cpu / gpu
   save:
-    period: 1 # every 1 epoch save
+    period: 10 # every 1 epoch save
     best: True # save the best score
 
 dataset:
