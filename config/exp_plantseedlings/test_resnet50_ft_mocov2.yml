@@ -37,7 +37,7 @@ model:
   num_classes: 12
 
 train:
-  max_epoch: 12
+  max_epoch: 50
   batch_size: 128
   lr: 1e-5
   num_workers: 4

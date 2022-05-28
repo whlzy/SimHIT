@@ -19,6 +19,9 @@ def save_checkpoint(state, is_best, filepath1, filepath2, filename='checkpoint.p
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = directory + filename
+    for k in list(state["model"].keys()):
+        if "ops" in k or "params" in k:
+            state["model"].pop(k)
     torch.save(state, filename)
     if is_best:
         if not os.path.exists(filepath1 + 'best/'):
