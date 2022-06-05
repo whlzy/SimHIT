@@ -62,8 +62,17 @@ sh scripts/train_resnet18.sh
 |:-:|:----:|:----:|:----:|
 |MNIST |Hardswish | 98.16%|  |
 |MNIST |ReLU | 88.35%|  |
-|Caltech101 |AlexNet | 71.46%| train data : val data = 9 : 1 |
-|PlantSeedlings |ResNet18 | 94.1909%| train data : val data = 9 : 1 |
+|Caltech101 |AlexNet | 71.46%||
+|PlantSeedlings |ResNet50 | 98.34%||
+
+## Environment Note 🔔
+You need install following packages:
+```
+thop
+tqdm
+pytorch >= 1.6
+skimage <= 0.16.2
+```
 
 ## License ⭐
 This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).

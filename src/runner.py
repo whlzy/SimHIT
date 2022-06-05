@@ -60,6 +60,8 @@ class runner():
                 self.train_transforms.append(transforms.RandomCrop(self.config['dataset']['train']['RandomCrop']))
             if 'ColorJitter' in self.config['dataset']['train']:
                 self.train_transforms.append(transforms.ColorJitter(*self.config['dataset']['train']['ColorJitter']))
+            if 'RandomRotation' in self.config['dataset']['train']:
+                self.train_transforms.append(transforms.RandomRotation(self.config['dataset']['train']['RandomRotation']))
             self.train_transforms.append(transforms.ToTensor())
             if 'Normalize' in self.config['dataset']['train']:
                 self.train_transforms.append(transforms.Normalize(mean=self.config['dataset']['train']['Normalize']['mean'],
@@ -124,7 +126,7 @@ class runner():
             minlr = 0.0
             period = 0
             if schedule_config['minlr'] is not None:
-                minlr = schedule_config['minlr']
+                minlr = float(schedule_config['minlr'])
             if schedule_config['period'] is not None:
                 period = schedule_config['period']
             self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR\

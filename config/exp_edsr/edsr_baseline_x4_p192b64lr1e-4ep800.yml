@@ -1,0 +1,70 @@
+basic:
+  seed: 202205
+  device: 'gpu' # cpu / gpu
+  save:
+    period: 50 # every 1 epoch save
+    best: True # save the best score
+
+dataset:
+  train:
+    name: 'div2k'
+    path: '/home/whlzy90/data/DIV2K_npy'
+    ext: '.npy' # '.png'
+    is_train: True
+    repeat_dataset: 1
+    training_dataset_number: 800
+    rgb_range: 1
+    colors_channel: 3
+    patch_size: 192
+    scale: 4
+  test:
+    name: 'set5'
+    path: '/home/whlzy90/code/SimHIT/dataset/SR'
+    batch_size: 1
+    scale: 4
+    isY: False
+
+
+
+model:
+  name: 'r16f64'
+  args:
+    n_resblocks: 16
+    n_feats: 64
+    res_scale: 1
+    scale: 4
+    no_upsampling: False
+    rgb_range: 1
+  # name: 'r32f256x2'
+  # args:
+  #   n_resblocks: 32
+  #   n_feats: 256
+  #   res_scale: 0.1
+  #   scale: 2
+  #   no_upsampling: False
+  #   rgb_range: 1
+
+train:
+  max_epoch: 800
+  batch_size: 64
+  lr: 1e-4
+  num_workers: 16
+  optimizer:
+    type: 'adamw' # sgd / 'adamw'
+    beta1: 0.9
+    beta2: 0.999
+
+    # type: 'sgd'
+    # momentum: 0.99
+    # weight_decay: 1e-4
+  schedule:
+    type: 'Cosine' # Cosine / None / MultiStep
+    minlr: 1e-8
+    period: 100
+    # warmup: 'linear'
+    # warmup_iters: 1 # 1 epoch
+    # warmup_ratio: 1e-4
+
+    # type: 'MultiStep' # Cosine / None / MultiStep
+    # milestones: [5, 10]
+    # gamma: 0.5
