@@ -3,7 +3,7 @@ import yaml
 import torch
 import torch.nn as nn
 import argparse
-import src.model.senet as senet
+import src.model.SENet as senet
 import src.data.PlantSeedlings as PlantSeedlings
 import src.runner as runner
 import pandas as pd

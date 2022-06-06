@@ -7,7 +7,7 @@ basic:
 
 dataset:
   name: 'PlantSeedlings'
-  path: './datasets/Plant_Seedlings'
+  path: '/home/whlzy90/data/plant_seedlings'
   rate: 0.9
   train:
     Resize: [224, 224]

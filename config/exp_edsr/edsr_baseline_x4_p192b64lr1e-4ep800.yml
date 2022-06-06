@@ -4,7 +4,7 @@ basic:
   save:
     period: 50 # every 1 epoch save
     best: True # save the best score
-  dp: True
+  #dp: True
 
 dataset:
   train:
