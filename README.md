@@ -93,7 +93,7 @@ This project is released under the [Apache 2.0 license](https://github.com/whlzy
 Our code is partially borrowed from [MMCV](https://github.com/open-mmlab/mmcv) and [IMDN](https://github.com/Zheng222/IMDN). Thanks Yiting Zhang and Junjing huang for their help.
 
 ## Citation
-If you find this project useful in your research, please consider cite.
+If you find this project useful in your research, please consider to cite.
 ```
 @misc{SimHIT,
     title={SimHIT: A Simple Framework for HIT Pattern Recognition Experiment},
