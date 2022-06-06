@@ -5,37 +5,54 @@ import torch.nn as nn
 import argparse
 import src.utils.save as save
 import src.utils.logging as logging
+import src.utils.ddp as ddp
 import tqdm
 import time
 import shutil
 from torchvision import transforms
 from thop.profile import profile
 from torch.utils.tensorboard import SummaryWriter
+import torch.distributed as dist
+from torch.utils.tensorboard import SummaryWriter
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
 
 class runner():
-    def __init__(self, config_path, exp_name):
+    def __init__(self, config_path, exp_name):        
         loca=time.strftime('%Y-%m-%d-%H-%M-%S')
         self.config_path = config_path
         self.exp_name = os.path.join(exp_name, loca)
+
+        with open(self.config_path, 'r') as f: 
+            self.config = yaml.safe_load(f)
+        if 'ddp' in self.config['basic']:
+            ddp.init_distributed_mode(self.config['basic']['distributed'])
+            self.local_rank = int(os.environ["LOCAL_RANK"])
+            self.rank = int(os.environ["RANK"])
+            self.world_size = dist.get_world_size()
+            self.rank = dist.get_rank()
+        else:
+            self.local_rank=0
+            self.rank = 0
+
         cwd = os.getcwd()
         self.filepath = 'exp/%s/' % self.exp_name
-        if not os.path.exists(self.filepath):
+        if not os.path.exists(self.filepath) and self.rank == 0:
             os.makedirs(self.filepath)
             os.makedirs(self.filepath + 'logdir')
             os.makedirs(self.filepath + 'checkpoint')
         else:
             raise AssertionError("File has existed, please delete the file.")
+        
+        if self.rank == 0:
+            with open(os.path.join("exp", self.exp_name, "config.yaml"), 'w') as f:
+                yaml.dump(self.config, f)
+            self.writer = SummaryWriter(os.path.join('exp', self.exp_name, 'logdir'))
+            self.mmcv_logger = logging.get_logger('mmcv_logger', log_file=os.path.join('exp', self.exp_name, 'output.log')) 
+            self.mmcv_logger.info('Train log')
 
-        self.writer = SummaryWriter(os.path.join('exp', self.exp_name, 'logdir'))
-
-        self.mmcv_logger = logging.get_logger('mmcv_logger', log_file=os.path.join('exp', self.exp_name, 'output.log')) 
-        self.mmcv_logger.info('Train log')
-
-        with open(self.config_path, 'r') as f: 
-            self.config = yaml.safe_load(f)
-        with open(os.path.join("exp", self.exp_name, "config.yaml"), 'w') as f:
-            yaml.dump(self.config, f)
-        self.mmcv_logger.info(self.config)
+        if self.rank == 0:
+            self.mmcv_logger.info(self.config)
 
         self.seed = self.config['basic']['seed']
         torch.backends.cudnn.enabled = True
@@ -114,10 +131,18 @@ class runner():
         if self.config['basic']['device'] == 'gpu':
             torch.cuda.manual_seed(self.seed)
             self.model = self.model.cuda()
-        self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
-        self.mmcv_logger.info("\n{}".format(self.model))
-        self.mmcv_logger.info("********Training Start*******")
-
+            self.model_without_ddp = self.model
+            if 'dp' in self.config['basic']:
+                self.model = torch.nn.DataParallel(self.model)
+            if 'ddp' in self.config['basic']:
+                self.model = DDP(self.model, device_ids=[self.local_rank], output_device=self.local_rank)
+                self.model_without_ddp = self.model.module
+        
+        if self.rank == 0:
+            self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
+            self.mmcv_logger.info("\n{}".format(self.model))
+            self.mmcv_logger.info("********Training Start*******")
+        
         optimizer_config = self.config['train']['optimizer']
         if optimizer_config['type'] == 'adamw':
             self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr,\
@@ -150,34 +175,35 @@ class runner():
 
         best_acc = 0
         for i in range(self.max_epoch):
-            self.mmcv_logger.info('-----Epoch [{}/{}] START-----'.format(i + 1, self.max_epoch))
-            
-            self.writer.add_scalar('Lr/%s' % ('train'), self.optimizer.state_dict()['param_groups'][0]['lr'], i)
+            if self.rank == 0:
+                self.mmcv_logger.info('-----Epoch [{}/{}] START-----'.format(i + 1, self.max_epoch))
+                self.writer.add_scalar('Lr/%s' % ('train'), self.optimizer.state_dict()['param_groups'][0]['lr'], i)
 
             train_one_epoch(i, self.max_epoch)
             acc = test_one_epoch(i, self.max_epoch)
             
-            if self.config['basic']['save']['best'] == True:
+            if self.config['basic']['save']['best'] == True and self.rank == 0:
                 is_best = acc > best_acc
                 if is_best:
                     best_acc = acc
                     save.save_checkpoint({
                         'epoch': i,
-                        'model': self.model.state_dict(),
+                        'model': self.model_without_ddp.state_dict(),
                         'optimizer': self.optimizer.state_dict(),
                         'best_acc': best_acc
                     }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')
             
-            if (i+1) % self.config['basic']['save']['period'] == 0:
+            if (i+1) % self.config['basic']['save']['period'] == 0 and self.rank == 0:
                 save.save_checkpoint({
                     'epoch': i,
-                    'model': self.model.state_dict(),
+                    'model': self.model_without_ddp.state_dict(),
                     'optimizer': self.optimizer.state_dict(),
                     'best_acc': best_acc
                 }, is_best, self.filepath + 'checkpoint/', "ep" + str(i) + '/')            
-            
-            self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
-        self.mmcv_logger.info("********Training End*********")
+            if self.rank == 0:
+                self.mmcv_logger.info('-----Epoch [{}/{}] END  -----'.format(i + 1, self.max_epoch))
+        if self.rank == 0:
+            self.mmcv_logger.info("********Training End*********")
     
     def load_model(self, test_one_image=None, ckptpath=None):
         if ckptpath is None:
@@ -189,9 +215,9 @@ class runner():
         if self.config['basic']['device'] == 'gpu':
             torch.cuda.manual_seed(self.seed)
             self.model = self.model.cuda()
-        self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
-            
-        macs, params, time_used = self.calc_params_macs_time(test_one_image)
-        self.mmcv_logger.info("MACs: {:.5f}G, Params: {:.5f}M, Inference Time: {:.5f}MS".format(macs / 1e9, params / 1e6, time_used * 1e3))
-        self.mmcv_logger.info("\n{}".format(self.model))
-        self.mmcv_logger.info("**********Load End***********")
+        if self.rank == 0:
+            self.mmcv_logger.info("Device: {}".format(next(self.model.parameters()).device))
+            macs, params, time_used = self.calc_params_macs_time(test_one_image)
+            self.mmcv_logger.info("MACs: {:.5f}G, Params: {:.5f}M, Inference Time: {:.5f}MS".format(macs / 1e9, params / 1e6, time_used * 1e3))
+            self.mmcv_logger.info("\n{}".format(self.model))
+            self.mmcv_logger.info("**********Load End***********")
