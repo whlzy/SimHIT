@@ -1,0 +1,55 @@
+basic:
+  seed: 202205
+  device: 'gpu' # cpu / gpu
+  save:
+    period: 20 # every 1 epoch save
+    best: True # save the best score
+  write_iter: 1
+
+dataset:
+  name: 'mini_gan'
+  path: '/home/whlzy90/code/SimHIT/dataset/mini_gan/points.mat'
+
+
+model:
+  z_dimension: 2
+  data_dim: 2
+  hidden_dim: 64
+
+train:
+  max_epoch: 10000
+  batch_size: 2048
+
+  num_workers: 4
+  optimizer_generator:
+    lr: 5e-4
+    type: 'adamw' # sgd / 'adamw' / 'RMSprop'
+    beta1: 0.9
+    beta2: 0.999
+  optimizer_discriminator:
+    lr: 5e-4
+    type: 'adamw' # sgd / 'adamw' / 'RMSprop'
+    beta1: 0.9
+    beta2: 0.999
+
+  # optimizer_generator:
+  #   type: 'RMSprop' # sgd / 'adamw' / 'RMSprop'
+  #   alpha: 0.9
+  # optimizer_discriminator:
+  #   type: 'RMSprop' # sgd / 'adamw' / 'RMSprop'
+  #   alpha: 0.9
+
+    # type: 'sgd'
+    # momentum: 0.99
+    # weight_decay: 1e-4
+  # schedule:
+  #   type: 'Cosine' # Cosine / None / MultiStep
+  #   minlr: 0
+  #   period: 100
+    # warmup: 'linear'
+    # warmup_iters: 1 # 1 epoch
+    # warmup_ratio: 1e-4
+
+    # type: 'MultiStep' # Cosine / None / MultiStep
+    # milestones: [5, 10]
+    # gamma: 0.5

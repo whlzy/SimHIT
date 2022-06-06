@@ -83,6 +83,11 @@ class runner():
         self.train_transforms = transforms.Compose(self.train_transforms)
         self.test_transforms = transforms.Compose(self.test_transforms)
 
+        if 'write_iter' in self.config['basic']:
+            self.write_iter = self.config['basic']['write_iter']
+        else:
+            self.write_iter = 100
+
         self.model = None
         self.train_loader = None
         self.test_loader = None
