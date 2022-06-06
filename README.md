@@ -93,11 +93,11 @@ Our code is partially borrowed from [MMCV](https://github.com/open-mmlab/mmcv) a
 
 ## Citation
 If you find this project useful in your research, please consider cite.
-'''
+```
 @misc{mmcv,
     title={SimHIT: A Simple Framework for HIT Pattern Recognition Experiment},
     author={Zeyu Lu},
     howpublished = {\url{https://github.com/whlzy/SimHIT}},
     year={2022}
 }
-'''
+```
