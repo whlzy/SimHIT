@@ -41,6 +41,8 @@ Note: If you want to use DDP:
 3. please remember to modify the sampler in torch.utils.data.DataLoader.
 4. you need a **slurm environment**.
 
+Note: If you don't need dp or ddp, you can just delete the "**dp: True**" and "**ddp: your port**".
+
 ## EXP Log 📖
 EXP log is in the **exp/*/test_hardswish**.
 
@@ -70,8 +72,7 @@ sh scripts/train_resnet18.sh
 ### Results 📊
 |Dataset |Model  |Accuracy | Tip |
 |:-:|:----:|:----:|:----:|
-|MNIST |Hardswish | 98.16%|  |
-|MNIST |ReLU | 88.35%|  |
+|MNIST |MLP_4layers_Hardswish | 98.16%|  |
 |Caltech101 |AlexNet | 71.46%||
 |PlantSeedlings |ResNet50 | 98.34%||
 

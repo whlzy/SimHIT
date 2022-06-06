@@ -134,6 +134,7 @@ class runner():
             self.model_without_ddp = self.model
             if 'dp' in self.config['basic']:
                 self.model = torch.nn.DataParallel(self.model)
+                self.model_without_ddp = self.model.module
             if 'ddp' in self.config['basic']:
                 self.model = DDP(self.model, device_ids=[self.local_rank], output_device=self.local_rank)
                 self.model_without_ddp = self.model.module
