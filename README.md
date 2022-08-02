@@ -90,9 +90,9 @@ skimage <= 0.16.2
 This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).
 
 ## Acknowledgement
-Our code is partially borrowed from [MMCV](https://github.com/open-mmlab/mmcv) and [IMDN](https://github.com/Zheng222/IMDN). Thanks Yiting Zhang and Junjing huang for their help.
+Our code is partially borrowed from [MMCV](https://github.com/open-mmlab/mmcv) and [IMDN](https://github.com/Zheng222/IMDN). Thanks Yiting Zhang and Junjing Huang for their help.
 
-## Citation
+## Citation 📣
 If you find this project useful in your research, please consider to cite.
 ```
 @misc{SimHIT,
