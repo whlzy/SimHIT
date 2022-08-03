@@ -69,12 +69,6 @@ sh scripts/train_AlexNet.sh
 ```
 sh scripts/train_resnet18.sh
 ```
-### Results 📊
-|Dataset |Model  |Accuracy | Tip |
-|:-:|:----:|:----:|:----:|
-|MNIST |MLP_4layers_Hardswish | 98.16%|  |
-|Caltech101 |AlexNet | 71.46%||
-|PlantSeedlings |ResNet50 | 98.34%||
 
 ## Environment Note 🔔
 You need install following packages:
