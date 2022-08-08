@@ -83,7 +83,7 @@ skimage <= 0.16.2
 ## License ⭐
 This project is released under the [Apache 2.0 license](https://github.com/whlzy/PR_EXP/blob/master/LICENSE).
 
-## Acknowledgement
+## Acknowledgement🪐
 Our code is partially borrowed from [MMCV](https://github.com/open-mmlab/mmcv) and [IMDN](https://github.com/Zheng222/IMDN). Thanks Yiting Zhang and Junjing Huang for their help.
 
 ## Citation 📣
